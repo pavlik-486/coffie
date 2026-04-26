@@ -1,17 +1,18 @@
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, relationship
 
-
-from Database import Base
+from database.Database import Base
 
 
 class User(Base):
 
-    __table_name__ = 'users'
+    __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=True)
     name = Column(String, nullable=True)
     phone = Column(String, unique=True, nullable=True)
+
+    order = relationship(argument='Order', back_populates='orders')
 
     @validates('phone')
     def valid_phone(self, phone):
