@@ -1,5 +1,5 @@
-from database.Database import session, User, Menu, Order, AllCoffieBars, CoffieBar
-
+from database.Database import session
+from database.Database import User
 
 async def create_user(data):
     user_name = data.user_name
