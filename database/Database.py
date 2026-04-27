@@ -56,7 +56,7 @@ class CoffieBar(Base):
     __tablename__ = 'coffie_bar'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String, nullable=True)
+    name = Column(String, unique=True, nullable=True)
 
     # Связи
     orders = relationship('Order', back_populates='coffie_bar', cascade='all, delete')
@@ -70,11 +70,15 @@ class Menu(Base):
     coffie_bar_id = Column(Integer, ForeignKey('coffie_bar.id', ondelete='CASCADE'))
     name = Column(String, nullable=True)
     description = Column(String, nullable=False)
+    price = Column(Integer, nullable=True)
 
     # Связи
     coffie_bar = relationship('CoffieBar', back_populates='menu_items')
     orders = relationship('Order', back_populates='dish', )
 
+
+
+#
 #
 # import asyncio
 #
