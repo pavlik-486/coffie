@@ -1,7 +1,7 @@
-from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from database.Database import session
-from database.Database import User, CoffieBar, Menu
+from database.Database import User, Menu, CoffieBar
+from sqlalchemy import select
 
 
 async def create_user(name, phone):
@@ -18,17 +18,18 @@ async def create_user(name, phone):
         return False
 
 
-# черновой вариант, добавить отдельные функции для добавления записей
-async def add_dish(coffie_bar_id, coffie_bar_name,
+# рабочий вариант
+async def add_dish(coffie_bar_id,
                    name_dish, description, price):
     async with session() as db:
         check_bar = await db.execute(select(CoffieBar.id, CoffieBar.name).where(CoffieBar.id == coffie_bar_id))
-        result_check = check_bar.scalar()
-        if result_check():
-            dish = Menu(coffie_bar_id, name_dish, description, price)
-            await db.add(dish)
+        result_check = check_bar.fetchone()
+        check_dish = await db.execute(select(CoffieBar.id, CoffieBar.name, Menu.name).join(Menu).
+                                                   where(CoffieBar.id == coffie_bar_id, Menu.name == name_dish))
+        result_check_dish = check_dish.fetchone()
+        if result_check and not result_check_dish:
+            dish = Menu(coffie_bar_id=coffie_bar_id, name=name_dish, description=description, price=price)
+            db.add(dish)
             await db.commit()
-        else:
-            coffie_bar = CoffieBar(coffie_bar_name)
-            await db.add(coffie_bar)
-            await db.commit()
+            return True
+        return False

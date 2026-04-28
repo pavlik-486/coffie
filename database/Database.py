@@ -72,7 +72,6 @@ class Menu(Base):
     description = Column(String, nullable=False)
     price = Column(Integer, nullable=True)
 
-    # Связи
     coffie_bar = relationship('CoffieBar', back_populates='menu_items')
     orders = relationship('Order', back_populates='dish', )
 

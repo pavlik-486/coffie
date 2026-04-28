@@ -4,7 +4,7 @@ import pydantic
 from starlette.responses import JSONResponse
 from database.database_operation import create_user, add_dish
 
-app = fastapi.FastAPI()
+app = fastapi.FastAPI(debug=True)
 
 
 class ValidUser(pydantic.BaseModel):
@@ -15,7 +15,6 @@ class ValidUser(pydantic.BaseModel):
 
 class ValidBarAndDish(pydantic.BaseModel):
     coffie_bar_id: int
-    coffie_bar_name: str
     name: str
     descriprion: str
     price: int
@@ -40,12 +39,15 @@ async def registration_user(data: ValidUser):
 @app.post('/add_dish')
 async def add_coffie_bar(data: ValidBarAndDish):
     coffie_bar_id = data.coffie_bar_id
-    coffie_bar_name = data.coffie_bar_name
     name_dish = data.name
     description = data.descriprion
     price = data.price
-    await add_dish(coffie_bar_id, coffie_bar_name, name_dish, description, price)
-
+    result = await add_dish(coffie_bar_id, name_dish, description, price)
+    if result:
+        return JSONResponse(status_code=201,
+                            content={'successfully': f'drink {name_dish} have been added'})
+    return JSONResponse(status_code=500,
+                        content={"message": "coffee_bar is not found or drink already added"})
 
 
 
