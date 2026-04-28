@@ -7,7 +7,8 @@ URL = 'http://127.0.0.1:8000'
 async def ragistration_user():
     async with aiohttp.ClientSession() as session:
         add_user = await session.post(f'{URL}/registration',
-                                      json={'user_name': 'Paul', 'user_phone': '+79177778899'})
+                                      json={'user_name': 'Paul',
+                                            'user_phone': '+79177778899'})
 
         add_user = await add_user.json()
         print(add_user)
