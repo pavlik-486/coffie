@@ -34,9 +34,10 @@ async def add_dish(coffie_bar_id,
             return True
         return False
 
+
 # дописать добавление кофейни
 async def add_bar(bar):
     async with session() as db:
-        check_bar = await db.execute(select(CoffieBar.id, CoffieBar.name).where(CoffieBar.id == coffie_bar_id))
+        check_bar = await db.execute(select(CoffieBar.id, CoffieBar.name).where(CoffieBar.name == bar))
         result_check = check_bar.fetchone()
         pass
