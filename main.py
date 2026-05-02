@@ -1,8 +1,9 @@
 import fastapi
 import uvicorn
 import pydantic
+from fastapi.params import Query
 from starlette.responses import JSONResponse
-from database.database_operation import create_user, add_dish, add_bar
+from database.database_operation import create_user, add_dish, add_bar, get_all_bars, bars_menu
 
 
 app = fastapi.FastAPI(debug=True)
@@ -14,13 +15,11 @@ class ValidUser(pydantic.BaseModel):
 
 
 class ValidBarAndDish(pydantic.BaseModel):
-    coffie_bar_id: int
-    name: str
-    descriprion: str
-    price: int
-
-class ValidBar(pydantic.BaseModel):
-    name: str
+    coffie_bar_id: int = None
+    bar_name: str = None
+    name: str = None
+    descriprion: str = None
+    price: int = None
 
 
 @app.post('/registration')
@@ -54,14 +53,28 @@ async def add_coffie_bar(data: ValidBarAndDish):
 
 
 @app.post('/add_bar')
-async def add_coffie_bar(data: ValidBar):
-    bar_name = data.name
+async def add_coffie_bar(data: ValidBarAndDish):
+    bar_name = data.bar_name
     result = await add_bar(bar_name)
     if result:
         return JSONResponse(status_code=201,
                             content={'successfully': f'bar {bar_name} have been added'})
     return JSONResponse(status_code=500,
                         content={"message": "coffee bar already added"})
+
+
+@app.get('/bars')
+async def all_coffee_bars():
+    result = await get_all_bars()
+    return JSONResponse(status_code=200, content=result)
+
+
+@app.get('/bars_menu')
+async def menu_bar(bar_name: str = Query()):
+    result = await bars_menu(bar_name)
+    return JSONResponse(status_code=200, content=result)
+
+
 
 
 

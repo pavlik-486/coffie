@@ -44,7 +44,7 @@ class Order(Base):
     dish_id = Column(Integer, ForeignKey('menu.id', ondelete='CASCADE'))
     order_time = Column(String, nullable=True)
     get_order_time = Column(String, nullable=True)
-    status = Column(String, nullable=True)
+    status = Column(String, nullable=True, default='Created')
 
     # Связи
     user = relationship('User', back_populates='orders')

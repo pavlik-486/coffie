@@ -1,3 +1,5 @@
+import asyncio
+
 from sqlalchemy.exc import IntegrityError
 from database.Database import session
 from database.Database import User, Menu, CoffieBar
@@ -35,9 +37,36 @@ async def add_dish(coffie_bar_id,
         return False
 
 
-# дописать добавление кофейни
 async def add_bar(bar):
     async with session() as db:
         check_bar = await db.execute(select(CoffieBar.id, CoffieBar.name).where(CoffieBar.name == bar))
         result_check = check_bar.fetchone()
-        pass
+        if not result_check:
+            bar = CoffieBar(name=bar)
+            db.add(bar)
+            await db.commit()
+            return True
+        return False
+
+
+async def get_all_bars(): # список кофеен
+    async with session() as db:
+        all_bars = await db.execute(select(CoffieBar.name)) # ЭТО ИТЕРАТОР!!!
+        list_bars = all_bars.fetchall()
+        list_bars = {i: bar[0] for i, bar in zip(range(1, len(list_bars) + 1), list_bars)}
+        return list_bars
+
+
+async def bars_menu(bar):
+    async with session() as db:
+        result = await db.execute(select(Menu.name,
+                                           Menu.description,
+                                           Menu.price).join(CoffieBar).where(CoffieBar.name == bar))
+        bar_menu = {bar: {}}
+
+        for index, dish in enumerate(result.fetchall()):
+            coffie = {'name': dish[0],
+                      'description': dish[1],
+                      'price': dish[2]}
+            bar_menu[bar][index + 1] = coffie
+        return bar_menu
