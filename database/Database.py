@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Time, Text
 from sqlalchemy.orm import validates, relationship
 from pathlib import Path
 
@@ -34,7 +34,6 @@ class User(Base):
             return cleaned
 
 
-
 class Order(Base):
     __tablename__ = 'orders'
 
@@ -42,8 +41,8 @@ class Order(Base):
     user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'))
     coffie_bar_id = Column(Integer, ForeignKey('coffie_bar.id', ondelete='CASCADE', onupdate='CASCADE'))
     dish_id = Column(Integer, ForeignKey('menu.id', ondelete='CASCADE'))
-    order_time = Column(String, nullable=True)
-    get_order_time = Column(String, nullable=True)
+    order_time = Column(Time, nullable=True)
+    get_order_time = Column(Time, nullable=True)
     status = Column(String, nullable=True, default='Created')
 
     # Связи
@@ -57,7 +56,9 @@ class CoffieBar(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, unique=True, nullable=True)
-
+    open_time = Column(Time, nullable=True)
+    close_time = Column(Time, nullable=True)
+    sum_income = Column(Integer, default=0)
     # Связи
     orders = relationship('Order', back_populates='coffie_bar', cascade='all, delete')
     menu_items = relationship('Menu', back_populates='coffie_bar', cascade='all, delete')
@@ -69,11 +70,15 @@ class Menu(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     coffie_bar_id = Column(Integer, ForeignKey('coffie_bar.id', ondelete='CASCADE'))
     name = Column(String, nullable=True)
-    description = Column(String, nullable=False)
+    photo = Column(String)
+    description = Column(Text, nullable=False)
     price = Column(Integer, nullable=True)
+
 
     coffie_bar = relationship('CoffieBar', back_populates='menu_items')
     orders = relationship('Order', back_populates='dish', )
+
+
 
 
 

@@ -20,7 +20,6 @@ async def create_user(name, phone):
         return False
 
 
-# рабочий вариант
 async def add_dish(coffie_bar_id,
                    name_dish, description, price):
     async with session() as db:
@@ -70,3 +69,7 @@ async def bars_menu(bar):
                       'price': dish[2]}
             bar_menu[bar][index + 1] = coffie
         return bar_menu
+
+
+
+

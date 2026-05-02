@@ -22,6 +22,7 @@ class ValidBarAndDish(pydantic.BaseModel):
     price: int = None
 
 
+# добавить в проверяющие функции is_
 @app.post('/registration')
 async def registration_user(data: ValidUser):
     new_name = data.user_name
@@ -63,17 +64,21 @@ async def add_coffie_bar(data: ValidBarAndDish):
                         content={"message": "coffee bar already added"})
 
 
-@app.get('/bars')
+@app.get('/bars') # все кофейни
 async def all_coffee_bars():
     result = await get_all_bars()
     return JSONResponse(status_code=200, content=result)
 
 
-@app.get('/bars_menu')
+@app.get('/bars_menu') # меню одной кофейни
 async def menu_bar(bar_name: str = Query()):
     result = await bars_menu(bar_name)
     return JSONResponse(status_code=200, content=result)
 
+
+@app.post('/create_order')
+async def order():
+    pass
 
 
 
