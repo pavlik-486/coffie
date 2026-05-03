@@ -4,7 +4,7 @@ import pydantic
 from fastapi.params import Query
 from starlette.responses import JSONResponse
 from database.database_operation import create_user, add_dish, add_bar, get_all_bars, bars_menu
-
+from datetime import time, datetime
 
 app = fastapi.FastAPI(debug=True)
 
@@ -18,8 +18,24 @@ class ValidBarAndDish(pydantic.BaseModel):
     coffie_bar_id: int = None
     bar_name: str = None
     name: str = None
+    open_time: time = None
+    close_time: time = None
     descriprion: str = None
     price: int = None
+
+
+class Order(pydantic.BaseModel):
+    user_id: int
+    bar_name: str
+    coffee_id: int
+    create_date = datetime.now() # дописать формат
+
+
+class Statistic(pydantic.BaseModel):
+    bar_name: str
+    start_time = datetime | None
+    end_time = datetime | None
+    date = datetime | None
 
 
 # добавить в проверяющие функции is_
@@ -77,7 +93,29 @@ async def menu_bar(bar_name: str = Query()):
 
 
 @app.post('/create_order')
-async def order():
+async def order(data: Order):
+    user_id = data.user_id
+    bar_name = data.bar_name
+    coffee_id = data.coffee_id
+    create_date = data.create_date
+
+
+
+
+
+@app.get('/period_statistic') #статистика за период
+async def stat_month(data: Statistic):
+    start = data.start_time
+    end = data.end_time
+    bar = data.bar_name
+    result = {'bar': bar,
+              'statistic period': f'{start} - {end}'}
+    pass
+
+
+@app.get('/date_stat') # статистика по дням
+async def date_stat(data: Statistic):
+    date = data.date
     pass
 
 

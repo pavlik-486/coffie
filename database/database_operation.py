@@ -71,5 +71,12 @@ async def bars_menu(bar):
         return bar_menu
 
 
+async def create_order():
+    pass
+
+
+async def get_statistic(bar, start_time, end_time):
+    async with session() as db:
+        pass
 
 

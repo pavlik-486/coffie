@@ -41,7 +41,7 @@ class Order(Base):
     user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'))
     coffie_bar_id = Column(Integer, ForeignKey('coffie_bar.id', ondelete='CASCADE', onupdate='CASCADE'))
     dish_id = Column(Integer, ForeignKey('menu.id', ondelete='CASCADE'))
-    order_time = Column(Time, nullable=True)
+    create_time = Column(Time, nullable=True)
     get_order_time = Column(Time, nullable=True)
     status = Column(String, nullable=True, default='Created')
 
