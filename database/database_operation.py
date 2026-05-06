@@ -1,7 +1,7 @@
-import asyncio
+import datetime
 
 from sqlalchemy.exc import IntegrityError
-from database.Database import session
+from database.Database import session, Order
 from database.Database import User, Menu, CoffieBar
 from sqlalchemy import select
 
@@ -23,12 +23,12 @@ async def create_user(name, phone):
 async def add_dish(coffie_bar_id,
                    name_dish, description, price):
     async with session() as db:
-        check_bar = await db.execute(select(CoffieBar.id, CoffieBar.name).where(CoffieBar.id == coffie_bar_id))
-        result_check = check_bar.fetchone()
+        bar = await db.execute(select(CoffieBar.id, CoffieBar.name).where(CoffieBar.id == coffie_bar_id))
+        result_bar = bar.fetchone()
         check_dish = await db.execute(select(CoffieBar.id, CoffieBar.name, Menu.name).join(Menu).
                                                    where(CoffieBar.id == coffie_bar_id, Menu.name == name_dish))
         result_check_dish = check_dish.fetchone()
-        if result_check and not result_check_dish:
+        if result_bar and not result_check_dish:
             dish = Menu(coffie_bar_id=coffie_bar_id, name=name_dish, description=description, price=price)
             db.add(dish)
             await db.commit()
@@ -36,12 +36,12 @@ async def add_dish(coffie_bar_id,
         return False
 
 
-async def add_bar(bar):
+async def add_bar(bar_name, open, close):
     async with session() as db:
-        check_bar = await db.execute(select(CoffieBar.id, CoffieBar.name).where(CoffieBar.name == bar))
-        result_check = check_bar.fetchone()
-        if not result_check:
-            bar = CoffieBar(name=bar)
+        bar = await db.execute(select(CoffieBar.id, CoffieBar.name).where(CoffieBar.name == bar_name))
+        result_bar = bar.fetchone()
+        if not result_bar:
+            bar = CoffieBar(name=bar_name, open_time=open, close_time=close)
             db.add(bar)
             await db.commit()
             return True
@@ -71,8 +71,11 @@ async def bars_menu(bar):
         return bar_menu
 
 
-async def create_order():
-    pass
+async def create_order(user_id, bar, coffie_id, create_date=datetime.datetime.now()):
+    async with session() as db:
+        get_user = await db.execute(select(User.name, User.phone).where(User.id == user_id))
+        user = get_user.fetchall()
+        print(user)
 
 
 async def get_statistic(bar, start_time, end_time):

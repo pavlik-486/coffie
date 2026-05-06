@@ -1,5 +1,6 @@
 import asyncio
 import aiohttp
+from datetime import time
 
 URL = 'http://127.0.0.1:8000'
 
@@ -7,8 +8,8 @@ URL = 'http://127.0.0.1:8000'
 async def ragistration_user():
     async with aiohttp.ClientSession() as session:
         add_user = await session.post(f'{URL}/registration',
-                                      json={'user_name': 'Paul',
-                                            'user_phone': '+79177778899'})
+                                      json={'user_name': 'Sam',
+                                            'user_phone': '+79177778890'})
 
         add_user = await add_user.json()
         print(add_user)
@@ -16,8 +17,8 @@ async def ragistration_user():
 
 async def add_dish():
     async with aiohttp.ClientSession() as session:
-        add_coffie_dish = await session.post(f'{URL}/add_dish', json={'coffie_bar_id': 1,
-                                                                          'name': 'Mokka',
+        add_coffie_dish = await session.post(f'{URL}/add_dish', json={'coffie_bar_id': 2,
+                                                                          'name': 'Raf',
                                                                           'descriprion': 'Молоко, кофе',
                                                                           'price': 150})
         res = await add_coffie_dish.json()
@@ -26,9 +27,16 @@ async def add_dish():
 
 async def add_c_bar():
     async with aiohttp.ClientSession() as session:
-        add_bar_c = await session.post(f'{URL}/add_bar', json={'bar_name': 'Surf'})
-        res = await add_bar_c.json()
-        print(res)
+        open_time_str = time(10, 0).strftime('%H:%M')
+        close_time_str = time(22, 0).strftime('%H:%M')
+
+        data = {
+            'bar_name': 'Сова',
+            'open_time': open_time_str,
+            'close_time': close_time_str
+        }
+
+        await session.post(f'{URL}/add_bar', json=data)
 
 
 async def all_bars():
@@ -46,6 +54,10 @@ async def bars_menu():
         print(menu)
 
 
+async def create_order():
+    async with aiohttp.ClientSession() as session:
+        data = {}
+
 
 if __name__ == '__main__':
-    asyncio.run(bars_menu())
+    asyncio.run(add_dish())

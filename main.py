@@ -6,6 +6,7 @@ from starlette.responses import JSONResponse
 from database.database_operation import create_user, add_dish, add_bar, get_all_bars, bars_menu
 from datetime import time, datetime
 
+
 app = fastapi.FastAPI(debug=True)
 
 
@@ -24,18 +25,19 @@ class ValidBarAndDish(pydantic.BaseModel):
     price: int = None
 
 
+
 class Order(pydantic.BaseModel):
     user_id: int
     bar_name: str
     coffee_id: int
-    create_date = datetime.now() # дописать формат
+    create_date: datetime = pydantic.Field(default_factory=datetime.now) # дописать формат
 
 
 class Statistic(pydantic.BaseModel):
     bar_name: str
-    start_time = datetime | None
-    end_time = datetime | None
-    date = datetime | None
+    start_time: datetime | None = None
+    end_time: datetime | None = None
+    date: datetime | None = None
 
 
 # добавить в проверяющие функции is_
@@ -44,8 +46,8 @@ async def registration_user(data: ValidUser):
     new_name = data.user_name
     new_phone = data.user_phone
     if new_name and new_phone:
-        result = await create_user(name=new_name, phone=new_phone)
-        if result:
+        is_result = await create_user(name=new_name, phone=new_phone)
+        if is_result:
             return JSONResponse(status_code=201,
                             content={'successfully': f'user {data.user_name} have been created'})
         else:
@@ -61,8 +63,8 @@ async def add_coffie_bar(data: ValidBarAndDish):
     name_dish = data.name
     description = data.descriprion
     price = data.price
-    result = await add_dish(coffie_bar_id, name_dish, description, price)
-    if result:
+    is_result = await add_dish(coffie_bar_id, name_dish, description, price)
+    if is_result:
         return JSONResponse(status_code=201,
                             content={'successfully': f'drink {name_dish} have been added'})
     return JSONResponse(status_code=500,
@@ -72,7 +74,9 @@ async def add_coffie_bar(data: ValidBarAndDish):
 @app.post('/add_bar')
 async def add_coffie_bar(data: ValidBarAndDish):
     bar_name = data.bar_name
-    result = await add_bar(bar_name)
+    open_time = data.open_time
+    close_time = data.close_time
+    result = await add_bar(bar_name, open_time, close_time)
     if result:
         return JSONResponse(status_code=201,
                             content={'successfully': f'bar {bar_name} have been added'})
@@ -98,9 +102,7 @@ async def order(data: Order):
     bar_name = data.bar_name
     coffee_id = data.coffee_id
     create_date = data.create_date
-
-
-
+    pass
 
 
 @app.get('/period_statistic') #статистика за период
