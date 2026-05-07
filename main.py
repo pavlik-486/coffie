@@ -3,7 +3,12 @@ import uvicorn
 import pydantic
 from fastapi.params import Query
 from starlette.responses import JSONResponse
-from database.database_operation import create_user, add_dish, add_bar, get_all_bars, bars_menu
+from database.database_operation import (create_user,
+                                         add_dish,
+                                         add_bar,
+                                         get_all_bars,
+                                         bars_menu,
+                                         create_order)
 from datetime import time, datetime
 
 
@@ -25,12 +30,12 @@ class ValidBarAndDish(pydantic.BaseModel):
     price: int = None
 
 
-
-class Order(pydantic.BaseModel):
+class ValidOrder(pydantic.BaseModel):
     user_id: int
-    bar_name: str
+    bar_id: int
     coffee_id: int
     create_date: datetime = pydantic.Field(default_factory=datetime.now) # дописать формат
+    get_order_date: datetime = pydantic.Field(description="Желаемая дата получения заказа (указывает пользователь)")
 
 
 class Statistic(pydantic.BaseModel):
@@ -96,13 +101,17 @@ async def menu_bar(bar_name: str = Query()):
     return JSONResponse(status_code=200, content=result)
 
 
-@app.post('/create_order')
-async def order(data: Order):
+@app.post('/create_order') # пишу это
+async def order(data: ValidOrder):
     user_id = data.user_id
-    bar_name = data.bar_name
+    bar_id = data.bar_id
     coffee_id = data.coffee_id
     create_date = data.create_date
-    pass
+    get_order_date = data.get_order_date
+    is_result = await create_order(user_id, bar_id, coffee_id, create_date, get_order_date)
+    if is_result:
+        return JSONResponse(status_code=200,
+                            content={'successfully': f'order for {user_id} have been created'})
 
 
 @app.get('/period_statistic') #статистика за период
@@ -117,12 +126,8 @@ async def stat_month(data: Statistic):
 
 @app.get('/date_stat') # статистика по дням
 async def date_stat(data: Statistic):
-    date = data.date
     pass
 
 
-
-
-
 if __name__ == '__main__':
-    uvicorn.run(app, log_level='info')
+    uvicorn.run(app, port=8000, log_level='info')

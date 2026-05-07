@@ -71,11 +71,18 @@ async def bars_menu(bar):
         return bar_menu
 
 
-async def create_order(user_id, bar, coffie_id, create_date=datetime.datetime.now()):
+async def create_order(user_id, bar, coffie_id, create_date, get_order_date): # не доделан
     async with session() as db:
         get_user = await db.execute(select(User.name, User.phone).where(User.id == user_id))
         user = get_user.fetchall()
-        print(user)
+        if user:
+            order = Order(user_id=user_id, coffie_bar_id=bar, dish_id=coffie_id,
+                          create_time=create_date, get_order_time=get_order_date)
+            db.add(order)
+            await db.commit()
+            # Сделать шаг для выбора времени получения заказа
+            # сделать обработку времени получения
+            return True
 
 
 async def get_statistic(bar, start_time, end_time):

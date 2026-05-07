@@ -1,4 +1,7 @@
 import asyncio
+import datetime
+from datetime  import timedelta
+
 import aiohttp
 from datetime import time
 
@@ -54,10 +57,20 @@ async def bars_menu():
         print(menu)
 
 
-async def create_order():
+async def create_order(): # не доделан
     async with aiohttp.ClientSession() as session:
-        data = {}
+        data = {'user_id': 1,
+                'bar_id': 1,
+                'coffee_id': 2,
+                'create_time': str(datetime.datetime.now()),
+                'get_order_date': str(datetime.datetime.now() + timedelta(minutes=15))}
+
+        result = await session.post(f'{URL}/create_order', json=data)
+        print(1, await result.text())
+
+
+
 
 
 if __name__ == '__main__':
-    asyncio.run(add_dish())
+    asyncio.run(create_order())

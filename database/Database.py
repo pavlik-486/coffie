@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey, Time, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Time
 from sqlalchemy.orm import validates, relationship
 from pathlib import Path
 
@@ -41,8 +41,8 @@ class Order(Base):
     user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'))
     coffie_bar_id = Column(Integer, ForeignKey('coffie_bar.id', ondelete='CASCADE', onupdate='CASCADE'))
     dish_id = Column(Integer, ForeignKey('menu.id', ondelete='CASCADE'))
-    create_time = Column(Time, nullable=True)
-    get_order_time = Column(Time, nullable=True)
+    create_time = Column(DateTime, nullable=True)
+    get_order_time = Column(DateTime, nullable=True)
     status = Column(String, nullable=True, default='Created')
 
     # Связи
