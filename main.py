@@ -134,12 +134,12 @@ async def stat_month(data: Statistic):
     bar = data.bar_name
     result = {'bar': bar,
               'statistic period': f'{start} - {end}'}
-    pass
+    pass # функция взаимодействия написана
 
 
 @app.get('/date_stat') # статистика по дням
 async def date_stat(data: Statistic):
-    pass
+    pass #
 
 
 if __name__ == '__main__':

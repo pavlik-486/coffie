@@ -1,7 +1,8 @@
 from sqlalchemy.exc import IntegrityError
+
 from database.Database import session, Order
 from database.Database import User, Menu, CoffieBar
-from sqlalchemy import select, update
+from sqlalchemy import select, update, func, between, and_
 
 
 async def create_user(name, phone):
@@ -93,8 +94,30 @@ async def change_status(order_id, new_status):
         await db.commit()
         return True
 
-async def get_statistic(bar, start_time, end_time):
-    async with session() as db:
-        pass
 
+async def get_statistic(bar, start_time=None, end_time=None, weekday=None):
+    async with session() as db:
+        if start_time and end_time:
+            stat = select(
+                            CoffieBar.name,
+                            func.sum(Menu.price).label('total_sum'),
+                            func.count(Order.id).label('orders_count')
+                        ).select_from(
+                            CoffieBar
+                        ).join(
+                            Menu, CoffieBar.id == Menu.coffie_bar_id
+                        ).join(
+                            Order, CoffieBar.id == Order.coffie_bar_id
+                        ).where(
+                            and_(
+                                CoffieBar.name == bar,
+                                Order.create_time.between(start_time, end_time),
+                                Order.status == 'Completed'
+                            )
+                        ).group_by(
+                            CoffieBar.name
+                        )
+            result = await db.execute(stat)
+            return result.fetchall()
+        # не запускал еще, также дописать статистику по дням
 
