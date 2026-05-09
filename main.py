@@ -8,7 +8,8 @@ from database.database_operation import (create_user,
                                          add_bar,
                                          get_all_bars,
                                          bars_menu,
-                                         create_order)
+                                         create_order,
+                                         change_status)
 from datetime import time, datetime
 
 
@@ -36,6 +37,8 @@ class ValidOrder(pydantic.BaseModel):
     coffee_id: int
     create_date: datetime = pydantic.Field(default_factory=datetime.now) # дописать формат
     get_order_date: datetime = pydantic.Field(description="Желаемая дата получения заказа (указывает пользователь)")
+    status: str = None
+    order_id: int = None
 
 
 class Statistic(pydantic.BaseModel):
@@ -101,17 +104,27 @@ async def menu_bar(bar_name: str = Query()):
     return JSONResponse(status_code=200, content=result)
 
 
-@app.post('/create_order') # пишу это
+@app.post('/create_order') # создание заказа
 async def order(data: ValidOrder):
     user_id = data.user_id
     bar_id = data.bar_id
     coffee_id = data.coffee_id
     create_date = data.create_date
     get_order_date = data.get_order_date
-    is_result = await create_order(user_id, bar_id, coffee_id, create_date, get_order_date)
-    if is_result:
-        return JSONResponse(status_code=200,
-                            content={'successfully': f'order for {user_id} have been created'})
+    result = await create_order(user_id, bar_id, coffee_id, create_date, get_order_date)
+    if result:
+        return JSONResponse(content=result)
+    return JSONResponse(content={'error': 'check data'})
+
+
+@app.put('/change_order_status') # изменить статус заказа
+async def change_order_status(data: ValidOrder):
+    order_id = data.order_id
+    new_status = data.status
+    if new_status and order_id:
+        is_result = await change_status(order_id, new_status)
+        if is_result:
+            return JSONResponse(status_code=200, content={'message': f'order {order_id} status has been changed'})
 
 
 @app.get('/period_statistic') #статистика за период

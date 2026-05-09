@@ -38,7 +38,7 @@ class Order(Base):
     __tablename__ = 'orders'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'))
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
     coffie_bar_id = Column(Integer, ForeignKey('coffie_bar.id', ondelete='CASCADE', onupdate='CASCADE'))
     dish_id = Column(Integer, ForeignKey('menu.id', ondelete='CASCADE'))
     create_time = Column(DateTime, nullable=True)
@@ -90,6 +90,7 @@ async def init_models():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     await engine.dispose()
+
 
 if __name__ == "__main__":
     asyncio.run(init_models())

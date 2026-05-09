@@ -32,7 +32,6 @@ async def add_c_bar():
     async with aiohttp.ClientSession() as session:
         open_time_str = time(10, 0).strftime('%H:%M')
         close_time_str = time(22, 0).strftime('%H:%M')
-
         data = {
             'bar_name': 'Сова',
             'open_time': open_time_str,
@@ -59,15 +58,16 @@ async def bars_menu():
 
 async def create_order(): # не доделан
     async with aiohttp.ClientSession() as session:
+
+
         data = {'user_id': 1,
                 'bar_id': 1,
                 'coffee_id': 2,
-                'create_time': str(datetime.datetime.now()),
+                'create_time': str(datetime.datetime.now().strftime('%Y-%m-%d, %H:%M')),
                 'get_order_date': str(datetime.datetime.now() + timedelta(minutes=15))}
 
         result = await session.post(f'{URL}/create_order', json=data)
         print(1, await result.text())
-
 
 
 

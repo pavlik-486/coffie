@@ -1,9 +1,7 @@
-import datetime
-
 from sqlalchemy.exc import IntegrityError
 from database.Database import session, Order
 from database.Database import User, Menu, CoffieBar
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 
 async def create_user(name, phone):
@@ -36,7 +34,7 @@ async def add_dish(coffie_bar_id,
         return False
 
 
-async def add_bar(bar_name, open, close):
+async def add_bar(bar_name, open, close): # добавление новой кофейни
     async with session() as db:
         bar = await db.execute(select(CoffieBar.id, CoffieBar.name).where(CoffieBar.name == bar_name))
         result_bar = bar.fetchone()
@@ -67,23 +65,33 @@ async def bars_menu(bar):
             coffie = {'name': dish[0],
                       'description': dish[1],
                       'price': dish[2]}
+
             bar_menu[bar][index + 1] = coffie
-        return bar_menu
+        if len(bar_menu) != 0:
+            return bar_menu
+        return f'bar {bar} is not found'
 
 
 async def create_order(user_id, bar, coffie_id, create_date, get_order_date): # не доделан
     async with session() as db:
         get_user = await db.execute(select(User.name, User.phone).where(User.id == user_id))
         user = get_user.fetchall()
+        # Сделать шаг для выбора времени получения заказа
+        # сделать обработку времени получения
         if user:
             order = Order(user_id=user_id, coffie_bar_id=bar, dish_id=coffie_id,
                           create_time=create_date, get_order_time=get_order_date)
             db.add(order)
             await db.commit()
-            # Сделать шаг для выбора времени получения заказа
-            # сделать обработку времени получения
-            return True
+            return {'successfully': f'order for {user_id} have been created'}
+        return {'error': f'order with {user_id} not found'}
 
+
+async def change_status(order_id, new_status):
+    async with session() as db:
+        await db.execute(update(Order).where(Order.id == order_id).values({'status': new_status}))
+        await db.commit()
+        return True
 
 async def get_statistic(bar, start_time, end_time):
     async with session() as db:
