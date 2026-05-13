@@ -9,7 +9,8 @@ from database.database_operation import (create_user,
                                          get_all_bars,
                                          bars_menu,
                                          create_order,
-                                         change_status)
+                                         change_status,
+                                         get_statistic)
 from datetime import time, datetime
 
 
@@ -132,9 +133,17 @@ async def stat_month(data: Statistic):
     start = data.start_time
     end = data.end_time
     bar = data.bar_name
-    result = {'bar': bar,
-              'statistic period': f'{start} - {end}'}
-    pass # функция взаимодействия написана
+    statistic = await get_statistic(bar=bar, start_time=start, end_time=end)
+    if statistic[1]:
+        result = {'bar': bar,
+              'statistic period': f'{start} - {end}',
+              'orders_count': statistic[2],
+              'amount_of_orders': statistic[1]}
+        return JSONResponse(status_code=200,
+                            content=result)
+    else:
+        return JSONResponse(status_code=200,
+                            content={'message': f'Orders from bar {bar} not found'})
 
 
 @app.get('/date_stat') # статистика по дням

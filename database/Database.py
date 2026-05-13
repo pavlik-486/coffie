@@ -1,8 +1,9 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Time
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Time, Enum
 from sqlalchemy.orm import validates, relationship
 from pathlib import Path
+import enum
 
 DB_DIR = Path(__file__).parent
 DB_PATH = DB_DIR / "database.db"
@@ -38,9 +39,9 @@ class Order(Base):
     __tablename__ = 'orders'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
-    coffie_bar_id = Column(Integer, ForeignKey('coffie_bar.id', ondelete='CASCADE', onupdate='CASCADE'))
-    dish_id = Column(Integer, ForeignKey('menu.id', ondelete='CASCADE'))
+    user_id = Column(Integer, ForeignKey(column='users.id'), nullable=True)
+    coffie_bar_id = Column(Integer, ForeignKey('coffie_bar.id', onupdate='CASCADE'))
+    dish_id = Column(Integer, ForeignKey(column='menu.id'))
     create_time = Column(DateTime, nullable=True)
     get_order_time = Column(DateTime, nullable=True)
     status = Column(String, nullable=True, default='Created')
@@ -79,7 +80,26 @@ class Menu(Base):
     orders = relationship('Order', back_populates='dish', )
 
 
+class Type(enum.Enum):
+    DEPOSIT = 'deposit' # пополнение
+    WITHDRAWAL = 'withdrawal' # списание
+    TRANSFER = 'transfer' # перевод
 
+class Status(enum.Enum):
+    PENDING = 'pending' # в обработке
+    SUCCESS = 'success' # успешно
+    FAILED = 'failed' # Ошибка
+    CANCELLED = 'cancelled' # Отменено
+
+
+class Transaction(Base):
+    __tablename__ = 'transaction'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    type = Column(Enum(Type), nullable=True)
+    status = Column(Enum(Status), nullable=True)
+    meta_data = Column(String)
 
 
 #

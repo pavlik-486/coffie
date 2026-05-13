@@ -21,9 +21,9 @@ async def ragistration_user():
 async def add_dish():
     async with aiohttp.ClientSession() as session:
         add_coffie_dish = await session.post(f'{URL}/add_dish', json={'coffie_bar_id': 2,
-                                                                          'name': 'Raf',
+                                                                          'name': 'Mokka',
                                                                           'descriprion': 'Молоко, кофе',
-                                                                          'price': 150})
+                                                                          'price': 450})
         res = await add_coffie_dish.json()
         print(res)
 
@@ -61,7 +61,7 @@ async def create_order(): # не доделан
 
 
         data = {'user_id': 1,
-                'bar_id': 1,
+                'bar_id': 2,
                 'coffee_id': 2,
                 'create_time': str(datetime.datetime.now().strftime('%Y-%m-%d, %H:%M')),
                 'get_order_date': str(datetime.datetime.now() + timedelta(minutes=15))}
