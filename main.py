@@ -10,7 +10,8 @@ from database.database_operation import (create_user,
                                          bars_menu,
                                          create_order,
                                          change_status,
-                                         get_statistic)
+                                         get_statistic_period,
+                                         get_statistic_day)
 from datetime import time, datetime
 
 
@@ -47,6 +48,7 @@ class Statistic(pydantic.BaseModel):
     start_time: datetime | None = None
     end_time: datetime | None = None
     date: datetime | None = None
+    day: datetime | None = None
 
 
 # добавить в проверяющие функции is_
@@ -133,7 +135,7 @@ async def stat_month(data: Statistic):
     start = data.start_time
     end = data.end_time
     bar = data.bar_name
-    statistic = await get_statistic(bar=bar, start_time=start, end_time=end)
+    statistic = await get_statistic_period(bar=bar, start_time=start, end_time=end)
     if statistic[1]:
         result = {'bar': bar,
               'statistic period': f'{start} - {end}',
@@ -148,7 +150,19 @@ async def stat_month(data: Statistic):
 
 @app.get('/date_stat') # статистика по дням
 async def date_stat(data: Statistic):
-    pass #
+    bar = data.bar_name
+    day = data.day
+    statistic = await get_statistic_day(bar=bar, day=day)
+    if statistic:
+        result = {'bar': bar,
+              'day': f'{day}',
+              'orders_count': statistic[2],
+              'amount_of_orders': statistic[1]}
+        return JSONResponse(status_code=200,
+                            content=result)
+    else:
+        return JSONResponse(status_code=200,
+                            content={'message': f'Orders from bar {bar} not found'})
 
 
 if __name__ == '__main__':

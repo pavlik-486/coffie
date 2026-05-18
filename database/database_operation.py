@@ -1,5 +1,4 @@
 from sqlalchemy.exc import IntegrityError
-
 from database.Database import session, Order
 from database.Database import User, Menu, CoffieBar
 from sqlalchemy import select, update, func, between, and_
@@ -95,7 +94,7 @@ async def change_status(order_id, new_status):
         return True
 
 
-async def get_statistic(bar, start_time=None, end_time=None, weekday=None):
+async def get_statistic_period(bar, start_time=None, end_time=None):
     async with session() as db:
         if start_time and end_time:
             stat = select(
@@ -105,9 +104,9 @@ async def get_statistic(bar, start_time=None, end_time=None, weekday=None):
                         ).select_from(
                             CoffieBar
                         ).join(
-                            Menu, CoffieBar.id == Menu.coffie_bar_id
+                                Order, CoffieBar.id == Order.coffie_bar_id
                         ).join(
-                            Order, CoffieBar.id == Order.coffie_bar_id
+                                Menu, Order.dish_id == Menu.id
                         ).where(
                             and_(
                                 CoffieBar.name == bar,
@@ -118,6 +117,31 @@ async def get_statistic(bar, start_time=None, end_time=None, weekday=None):
                             CoffieBar.name
                         )
             result = await db.execute(stat)
-            return result.fetchall()
-        # не запускал еще, также дописать статистику по дням
+            return result.fetchall()[1]
 
+
+async def get_statistic_day(bar, day):
+    async with session() as db:
+
+        request = select(
+            CoffieBar.name,
+            func.sum(Menu.price).label('total_sum'),
+            func.count(Order.id).label('orders_count')
+        ).select_from(
+            CoffieBar
+        ).join(
+            Order, CoffieBar.id == Order.coffie_bar_id
+        ).join(
+            Menu, Order.dish_id == Menu.id
+        ).where(
+            and_(
+                CoffieBar.name == bar,
+                Order.create_time == day,
+                Order.status == 'Completed'
+            )
+        ).group_by(
+            CoffieBar.name
+        )
+
+        result = await db.execute(request)
+        return result.fetchall()[1]

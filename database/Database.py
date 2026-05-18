@@ -14,6 +14,7 @@ session = async_sessionmaker(bind=engine, expire_on_commit=False)
 Base = declarative_base()
 
 
+# Регистрация пользователя
 class User(Base):
     __tablename__ = 'users'
 
@@ -34,6 +35,14 @@ class User(Base):
                 raise ValueError('Phone number must start with 7 or 8')
             return cleaned
 
+# Заказ
+class StatusOrder(enum.Enum):
+    CREATED = 'Created' # создан
+    IS_PREPARING = 'Preparing' # готовится
+    READY = 'Ready'
+    FAILED = 'Failed' # Ошибка
+    CANCELLED = 'Cancelled' # Отменен
+
 
 class Order(Base):
     __tablename__ = 'orders'
@@ -44,7 +53,7 @@ class Order(Base):
     dish_id = Column(Integer, ForeignKey(column='menu.id'))
     create_time = Column(DateTime, nullable=True)
     get_order_time = Column(DateTime, nullable=True)
-    status = Column(String, nullable=True, default='Created')
+    status = Column(Enum(StatusOrder), nullable=True, default=StatusOrder.CREATED)
 
     # Связи
     user = relationship('User', back_populates='orders')
@@ -52,6 +61,7 @@ class Order(Base):
     dish = relationship('Menu', back_populates='orders')
 
 
+# Кофейня
 class CoffieBar(Base):
     __tablename__ = 'coffie_bar'
 
@@ -60,11 +70,12 @@ class CoffieBar(Base):
     open_time = Column(Time, nullable=True)
     close_time = Column(Time, nullable=True)
     sum_income = Column(Integer, default=0)
-    # Связи
+
     orders = relationship('Order', back_populates='coffie_bar', cascade='all, delete')
     menu_items = relationship('Menu', back_populates='coffie_bar', cascade='all, delete')
 
 
+# Menu
 class Menu(Base):
     __tablename__ = 'menu'
 
@@ -75,17 +86,17 @@ class Menu(Base):
     description = Column(Text, nullable=False)
     price = Column(Integer, nullable=True)
 
-
     coffie_bar = relationship('CoffieBar', back_populates='menu_items')
     orders = relationship('Order', back_populates='dish', )
 
 
+# Транзакции
 class Type(enum.Enum):
     DEPOSIT = 'deposit' # пополнение
     WITHDRAWAL = 'withdrawal' # списание
     TRANSFER = 'transfer' # перевод
 
-class Status(enum.Enum):
+class StatusTransaction(enum.Enum):
     PENDING = 'pending' # в обработке
     SUCCESS = 'success' # успешно
     FAILED = 'failed' # Ошибка
@@ -98,12 +109,11 @@ class Transaction(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('users.id'))
     type = Column(Enum(Type), nullable=True)
-    status = Column(Enum(Status), nullable=True)
+    status = Column(Enum(StatusTransaction), nullable=True)
     meta_data = Column(String)
 
 
-#
-#
+
 import asyncio
 
 async def init_models():
